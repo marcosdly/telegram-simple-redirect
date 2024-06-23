@@ -32,6 +32,8 @@ class ParsedMessage:
     formatted_message: str
     images: Tuple[Dict[str, Any]]
     video: Dict[str, Any]
+    iso_datetime: str
+    posix_secs_timestamp: float
 
 
 def parse_argv() -> Dict[str, str]:
@@ -148,6 +150,8 @@ def bot() -> None:
             is_bot=update.message.from_user.is_bot,
             images=[p.to_dict() for p in photo],
             video=video.to_dict() if video else {},
+            iso_datetime=update.message.date.isoformat(),
+            posix_secs_timestamp=update.message.date.timestamp(),
         )
 
         response = requests.post(sendto, json=asdict(data))
