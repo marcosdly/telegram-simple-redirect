@@ -36,11 +36,11 @@ def parse_argv() -> Dict[str, str]:
         "default": None,
     }
 
-    # parser.add_argument(
-    #     "--send-to",
-    #     **default_options,
-    #     help="HTTP endpoint to which send the redirected messages",
-    # )
+    parser.add_argument(
+        "--send-to",
+        **default_options,
+        help="HTTP endpoint to which send the redirected messages",
+    )
 
     parser.add_argument(
         "--chat",
@@ -102,28 +102,18 @@ def listen() -> None:
 def bot() -> None:
     """Sends message to local http server."""
     args = parse_argv()
-    # endpoint: str = args["--send-to"]
+    sendto: str = args["send_to"]
     token: str = args["token"]
     chat: str = args["chat"]
-    host: str = args["host"] or "localhost"
-    port: int
 
-    try:
-        port = int(args["port"])
-    except ValueError:
-        port = DEFAULT_PORT
-
-    # if not endpoint:
-    #     print("Invalid endpoint string")
-    #     return
+    if not sendto:
+        raise ValueError("Invalid endpoint string")
 
     if not token:
-        print("Invalid token string")
-        return
+        raise ValueError("Invalid token string")
 
     if not chat:
-        print("Invalid chat identifier string")
-        return
+        raise ValueError("Invalid chat identifier string")
 
     async def redirect(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         data = ParsedMessage(
@@ -135,7 +125,7 @@ def bot() -> None:
             is_bot=update.message.from_user.is_bot,
         )
 
-        response = requests.post(f"http://localhost:{port}", json=asdict(data))
+        response = requests.post(sendto, json=asdict(data))
 
         if response.status_code == 200:
             prittified = json.dumps(asdict(data), indent=2)
