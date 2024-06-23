@@ -23,6 +23,7 @@ class ParsedMessage:
     username: str
     is_bot: bool
     message: str
+    caption: str
     formatted_message: str
     images: Tuple[Dict[str, Any]]
     video: Dict[str, Any]
@@ -132,6 +133,7 @@ def bot() -> None:
 
         data = ParsedMessage(
             message=update.message.text or "",
+            caption=update.message.caption or "",
             formatted_message=update.message.text_markdown_v2_urled or "",
             id=update.message.from_user.id,
             fullname=update.message.from_user.full_name,
