@@ -103,6 +103,8 @@ def listen() -> None:
 
 
 def remove_file_duplicates(files: Tuple[File]) -> List[File]:
+    if not len(files):
+        return []
     ordered = sorted(files, key=lambda file: file.file_size)
     offset = int(len(ordered) / 5)
     correct = list(ordered)
