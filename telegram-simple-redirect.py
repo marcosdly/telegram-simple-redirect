@@ -6,7 +6,12 @@ from flask import Flask, request
 import asyncio
 from multiprocessing import Process
 from telegram import Update, File
-from telegram.ext import ContextTypes, ApplicationBuilder, MessageHandler, filters
+from telegram.ext import (
+    ContextTypes,
+    ApplicationBuilder,
+    MessageHandler,
+    filters,
+)
 import requests
 
 DEFAULT_PORT = 6060
@@ -141,8 +146,8 @@ def bot() -> None:
             fullname=update.message.from_user.full_name,
             username=update.message.from_user.username or "",
             is_bot=update.message.from_user.is_bot,
-            images=[p.to_json() for p in photo],
-            video=video.to_json() if video else {},
+            images=[p.to_dict() for p in photo],
+            video=video.to_dict() if video else {},
         )
 
         response = requests.post(sendto, json=asdict(data))
