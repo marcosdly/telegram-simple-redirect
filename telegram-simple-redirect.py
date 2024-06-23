@@ -55,12 +55,6 @@ def parse_argv() -> Dict[str, str]:
     )
 
     parser.add_argument(
-        "--chat",
-        **default_options,
-        help="Phone number or group to watch for messages",
-    )
-
-    parser.add_argument(
         "--token",
         **default_options,
         help="Telegram app API token",
@@ -127,16 +121,12 @@ def bot() -> None:
     args = parse_argv()
     sendto: str = args["send_to"]
     token: str = args["token"]
-    chat: str = args["chat"]
 
     if not sendto:
         raise ValueError("Invalid endpoint string")
 
     if not token:
         raise ValueError("Invalid token string")
-
-    if not chat:
-        raise ValueError("Invalid chat identifier string")
 
     async def redirect(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         photo = remove_file_duplicates(update.message.photo)
