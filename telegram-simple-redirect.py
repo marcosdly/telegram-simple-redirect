@@ -1,15 +1,17 @@
 from argparse import ArgumentParser, Namespace
 import json
-from typing import Any, Dict, Tuple, TypeAlias
+from typing import Any, Dict, List, Tuple, TypeAlias
 from dataclasses import dataclass, asdict
 from flask import Flask, request
 import asyncio
 from multiprocessing import Process
-from telegram import Update
+from telegram import Update, File
 from telegram.ext import ContextTypes, ApplicationBuilder, MessageHandler, filters
 import requests
 
 DEFAULT_PORT = 6060
+
+file_counter = 0
 
 Url: TypeAlias = str
 
@@ -22,8 +24,8 @@ class ParsedMessage:
     is_bot: bool
     message: str
     formatted_message: str
-    # images: Tuple[Url]
-    # videos: Tuple[Url]
+    images: Tuple[Dict[str, Any]]
+    video: Dict[str, Any]
 
 
 def parse_argv() -> Dict[str, str]:
@@ -99,6 +101,15 @@ def listen() -> None:
     asyncio.run(app.run(host=host, port=port))
 
 
+def remove_file_duplicates(files: Tuple[File]) -> List[File]:
+    ordered = sorted(files, key=lambda file: file.file_size)
+    offset = int(len(ordered) / 5)
+    correct = list(ordered)
+    correct.reverse()
+
+    return correct[:offset]
+
+
 def bot() -> None:
     """Sends message to local http server."""
     args = parse_argv()
@@ -116,6 +127,9 @@ def bot() -> None:
         raise ValueError("Invalid chat identifier string")
 
     async def redirect(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        photo = remove_file_duplicates(update.message.photo)
+        video = update.message.video
+
         data = ParsedMessage(
             message=update.message.text or "",
             formatted_message=update.message.text_markdown_v2_urled or "",
@@ -123,13 +137,24 @@ def bot() -> None:
             fullname=update.message.from_user.full_name,
             username=update.message.from_user.username or "",
             is_bot=update.message.from_user.is_bot,
+            images=[p.to_json() for p in photo],
+            video=video.to_json() if video else {},
         )
 
         response = requests.post(sendto, json=asdict(data))
 
-        if response.status_code == 200:
-            prittified = json.dumps(asdict(data), indent=2)
-            await update.message.reply_markdown(f"```json\n{prittified}\n```")
+        if response.status_code != 200:
+            return
+
+        prittified = json.dumps(asdict(data), indent=2)
+        await update.message.reply_markdown(f"```json\n{prittified}\n```")
+
+        if len(photo):
+            for p in photo:
+                await update.message.chat.send_photo(p)
+
+        if video:
+            await update.message.chat.send_video(video)
 
     application = ApplicationBuilder().token(token).build()
 
