@@ -23,7 +23,9 @@ Url: TypeAlias = str
 
 @dataclass(frozen=True, init=True, kw_only=True)
 class ParsedMessage:
-    id: int
+    user_id: int
+    message_id: int
+    chat_id: int
     fullname: str
     username: str
     is_bot: bool
@@ -144,7 +146,9 @@ def bot() -> None:
             message=update.message.text or "",
             caption=update.message.caption or "",
             formatted_message=update.message.text_markdown_v2_urled or "",
-            id=update.message.from_user.id,
+            user_id=update.message.from_user.id,
+            message_id=update.message.id,
+            chat_id=update.message.chat_id,
             fullname=update.message.from_user.full_name,
             username=update.message.from_user.username or "",
             is_bot=update.message.from_user.is_bot,
