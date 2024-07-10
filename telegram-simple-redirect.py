@@ -38,8 +38,6 @@ def parse_argv() -> Dict[str, str]:
     """Set command line arguments and parses them."""
     parser = ArgumentParser()
     default_options = {
-        # "nargs": 1,
-        "required": True,
         "type": str,
         "default": None,
     }
@@ -47,23 +45,29 @@ def parse_argv() -> Dict[str, str]:
     parser.add_argument(
         "--send-to",
         **default_options,
+        required=True,
         help="HTTP endpoint to which send the redirected messages",
     )
 
     parser.add_argument(
         "--token",
         **default_options,
+        required=True,
         help="Telegram app API token",
     )
 
     parser.add_argument(
         "--host",
         **default_options,
+        required=False,
         help="HTTP URL of recipient server",
     )
 
     parser.add_argument(
-        "--port", **default_options, help="HTTP server port related to specified HOST"
+        "--port",
+        **default_options,
+        required=False,
+        help="HTTP server port related to specified HOST"
     )
 
     args: Namespace = parser.parse_args()
