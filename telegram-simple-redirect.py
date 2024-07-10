@@ -16,10 +16,6 @@ import requests
 
 DEFAULT_PORT = 6060
 
-file_counter = 0
-
-Url: TypeAlias = str
-
 
 @dataclass(frozen=True, init=True, kw_only=True)
 class ParsedMessage:
@@ -74,6 +70,7 @@ def parse_argv() -> Dict[str, str]:
 
     return vars(args)
 
+args = parse_argv()
 
 def listen() -> None:
     """Create HTTP server and listen on localhost."""
@@ -93,7 +90,7 @@ def listen() -> None:
         finally:
             return "", 200  # ok
 
-    args = parse_argv()
+    global args
     host: str = args["host"] or "localhost"
     port: int
 
@@ -118,7 +115,7 @@ def remove_file_duplicates(files: Tuple[File]) -> List[File]:
 
 def bot() -> None:
     """Sends message to local http server."""
-    args = parse_argv()
+    global args
     sendto: str = args["send_to"]
     token: str = args["token"]
 
